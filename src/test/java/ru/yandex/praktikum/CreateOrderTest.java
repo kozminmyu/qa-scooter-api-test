@@ -12,21 +12,13 @@ import ru.yandex.praktikum.data.NewOrderData;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.notNullValue;
+import static ru.yandex.praktikum.constant.EndpointConstant.*;
 
 // Тесты для метода создания нового заказа
 @RunWith(Parameterized.class)
 public class CreateOrderTest {
-    private String testFirstName = "Ivan";
-    private String testLastName = "Ivanov";
-    private String testAddress = "Moscow, Kremlin, 1";
-    private String testMetroStation = "4";
-    private String testPhone = "+7 800 355 35 35";
-    private int testRentTime = 5;
-    private String testDeliveryDate = "2022-08-27";
-    private String testComment = "gsdgkdkgsdk";
 
     // Параметр для параметризации
-    private String testDescription;
     private String[] testColor;
 
     public CreateOrderTest(String[] testColor) {
@@ -46,14 +38,14 @@ public class CreateOrderTest {
 
     @Before
     public void setUp() {
-        RestAssured.baseURI = "https://qa-scooter.praktikum-services.ru";
+        RestAssured.baseURI = BASE_URI;
     }
 
     // Успешное создание нового заказа (разных цветов)
     @Test
     @Description("Successful creation of a new order")
     public void createNewOrderAndCheckResponseForSuccess() {
-        NewOrderData newOrderData = new NewOrderData(testFirstName, testLastName, testAddress, testMetroStation, testPhone, testRentTime, testDeliveryDate, testComment, testColor);
+        NewOrderData newOrderData = new NewOrderData("Ivan", "Ivanov", "Moscow, Kremlin, 1", "4", "+7 800 355 35 35", 5, "2022-08-27", "gsdgkdkgsdk", testColor);
         // Отправка POST запроса
         Response response = sendPOSTRequestCreateOrder(newOrderData);
         // Сравнение кода
@@ -64,14 +56,12 @@ public class CreateOrderTest {
 
     @Step("Send POST request to /api/v1/orders")
     public Response sendPOSTRequestCreateOrder(NewOrderData newOrderData){
-        Response response =
-                given()
+        return given()
                         .header("Content-type", "application/json")
                         .and()
                         .body(newOrderData)
                         .when()
-                        .post("/api/v1/orders");
-        return response;
+                        .post(ORDERS_URI);
     }
 
     @Step("Compare status code")

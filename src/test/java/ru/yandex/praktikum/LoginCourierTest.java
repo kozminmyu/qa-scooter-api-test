@@ -13,6 +13,7 @@ import ru.yandex.praktikum.data.NewCourierData;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.*;
+import static ru.yandex.praktikum.constant.EndpointConstant.*;
 
 public class LoginCourierTest {
     private String testCourierLogin = "newTestCourier";
@@ -24,12 +25,7 @@ public class LoginCourierTest {
 
     @Before
     public void setUp() {
-        RestAssured.baseURI = "https://qa-scooter.praktikum-services.ru";
-    }
-
-    @Before
-    public void createCourierForTest() {
-
+        RestAssured.baseURI = BASE_URI;
     }
 
     // Успешная авторизация по логину и паролю
@@ -38,8 +34,8 @@ public class LoginCourierTest {
     public void loginWithExistingLoginAndPasswordAndCheckResponseForSuccess() {
         shouldDeleteCourier = true;
 
-        NewCourierData newCourierData = new NewCourierData(testCourierLogin, testCourierPassword, "Ivan");
-        LoginCourierData loginCourierData = new LoginCourierData(testCourierLogin, testCourierPassword);
+        NewCourierData newCourierData = new NewCourierData("newTestCourier", "1234", "Ivan");
+        LoginCourierData loginCourierData = new LoginCourierData("newTestCourier", "1234");
         // Создание нового курьера
         createNewCourier(newCourierData);
         // Отправка POST запроса
@@ -56,7 +52,7 @@ public class LoginCourierTest {
     public void loginWithNonexistentLoginAndCheckResponseForError() {
         shouldDeleteCourier = false;
 
-        LoginCourierData loginCourierData = new LoginCourierData(testCourierLogin, testCourierPassword);
+        LoginCourierData loginCourierData = new LoginCourierData("newTestCourier", "1234");
         // Отправка POST запроса
         Response response = sendPOSTRequestLoginCourier(loginCourierData);
         // Сравнение кода
@@ -72,8 +68,9 @@ public class LoginCourierTest {
     public void loginWithWrongPasswordAndCheckResponseForError() {
         shouldDeleteCourier = true;
 
-        NewCourierData newCourierData = new NewCourierData(testCourierLogin, testCourierPassword, "Ivan");
-        LoginCourierData loginCourierData = new LoginCourierData(testCourierLogin, incorrectTestCourierPassword);
+        NewCourierData newCourierData = new NewCourierData("newTestCourier", "1234", "Ivan");
+        // Создание данных с неправильным паролем
+        LoginCourierData loginCourierData = new LoginCourierData("newTestCourier", "4321");
         // Создание нового курьера
         createNewCourier(newCourierData);
         // Отправка POST запроса
@@ -91,7 +88,7 @@ public class LoginCourierTest {
     public void loginWithNoLoginAndCheckResponseForError() {
         shouldDeleteCourier = false;
 
-        LoginCourierData loginCourierData = new LoginCourierData("", testCourierPassword);
+        LoginCourierData loginCourierData = new LoginCourierData("", "1234");
         // Отправка POST запроса
         Response response = sendPOSTRequestLoginCourier(loginCourierData);
         // Сравнение кода
@@ -107,7 +104,7 @@ public class LoginCourierTest {
     public void loginWithNoPasswordAndCheckResponseForError() {
         shouldDeleteCourier = false;
 
-        LoginCourierData loginCourierData = new LoginCourierData(testCourierLogin, "");
+        LoginCourierData loginCourierData = new LoginCourierData("newTestCourier", "");
         // Отправка POST запроса
         Response response = sendPOSTRequestLoginCourier(loginCourierData);
         // Сравнение кода
@@ -121,7 +118,7 @@ public class LoginCourierTest {
     @After
     public void postProcessing() {
         if (shouldDeleteCourier) {
-            LoginCourierData loginCourierData = new LoginCourierData(testCourierLogin, testCourierPassword);
+            LoginCourierData loginCourierData = new LoginCourierData("newTestCourier", "1234");
 
             // Пост-обработка: получение id созданного курьера
             Response response = sendPOSTRequestLoginCourier(loginCourierData);
@@ -136,24 +133,21 @@ public class LoginCourierTest {
 
     @Step("Send POST request to /api/v1/courier/login")
     public Response sendPOSTRequestLoginCourier(LoginCourierData loginCourierData){
-        Response response =
-                given()
+        return given()
                         .header("Content-type", "application/json")
                         .and()
                         .body(loginCourierData)
                         .when()
-                        .post("/api/v1/courier/login");
-        return response;
+                        .post(LOGIN_URI);
     }
 
     @Step("Get courier ID")
     public int getCourierID(Response response) {
-        int id = response
+        return response
                 .then()
                 .extract()
                 .body()
                 .path("id");
-        return id;
     }
 
     @Step("Pre-processing: create  new  courier")
@@ -163,7 +157,7 @@ public class LoginCourierTest {
                 .and()
                 .body(newCourierData)
                 .when()
-                .post("/api/v1/courier/");
+                .post(COURIER_URI);
     }
 
     @Step("Compare status code")
@@ -193,6 +187,6 @@ public class LoginCourierTest {
                 .and()
                 .body(deleteCourierData)
                 .when()
-                .delete("/api/v1/courier/" + id);
+                .delete(COURIER_URI + id);
     }
 }

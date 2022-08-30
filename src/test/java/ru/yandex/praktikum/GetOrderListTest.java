@@ -10,12 +10,13 @@ import ru.yandex.praktikum.data.NewOrderData;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.*;
+import static ru.yandex.praktikum.constant.EndpointConstant.*;
 
 public class GetOrderListTest {
 
     @Before
     public void setUp() {
-        RestAssured.baseURI = "https://qa-scooter.praktikum-services.ru";
+        RestAssured.baseURI = BASE_URI;
     }
 
     // Успешное получение списка заказов
@@ -32,10 +33,7 @@ public class GetOrderListTest {
 
     @Step("Send POST request to /api/v1/orders")
     public Response sendGETRequestGetOrderList(){
-        Response response =
-                given()
-                        .get("/api/v1/orders");
-        return response;
+        return given().get(ORDERS_URI);
     }
 
     @Step("Compare status code")
