@@ -12,6 +12,12 @@ public class LoginCourierData {
         this.password = password;
     }
 
+    // Конструкор из данных курьера
+    public LoginCourierData(NewCourierData newCourierData) {
+        this.login = newCourierData.getLogin();
+        this.password = newCourierData.getPassword();
+    }
+
     // Конструктор без параметров для работы библиотеки Gson
     public LoginCourierData() {
     }
